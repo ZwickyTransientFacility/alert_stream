@@ -1,7 +1,7 @@
 alert_stream
 ============
 
-Code to access the ZTF alert stream on epyc remotely. 
+Code to access the ZTF alert stream remotely. 
 
 Requires Docker and Docker Compose for the usage instructions below.
 
@@ -15,7 +15,6 @@ Clone repo, cd into directory, and checkout appropriate branch.
 From the alert_stream directory:
 
 ```
-$ git checkout u/ebellm/remote-listener
 $ docker-compose up -d
 ```
 
@@ -45,9 +44,6 @@ To start a consumer for printing all alerts in the stream "test-stream" to scree
 $ docker run -it --rm \
       --network=host \
       --name=$(whoami)_printer \
-      --add-host="kafka:128.95.79.19" \
-      --add-host="kafka2:128.95.79.19" \
-      --add-host="kafka3:128.95.79.19" \
       ztf-listener python bin/printStream.py test-stream
 ```
 
@@ -61,9 +57,6 @@ To collect postage stamp cutouts and output files locally, you can mount a local
 $ docker run -it --rm \
       --network=host \
       --name=$(whoami)_printer \
-      --add-host="kafka:128.95.79.19" \
-      --add-host="kafka2:128.95.79.19" \
-      --add-host="kafka3:128.95.79.19" \
       -v {local path to write stamps}:/home/alert_stream/stamps:rw \
       ztf-listener python bin/printStream.py test-stream --stampDir stamps
 ```
