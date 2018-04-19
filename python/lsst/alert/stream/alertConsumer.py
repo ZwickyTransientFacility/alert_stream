@@ -63,17 +63,23 @@ class AlertConsumer(object):
         verbose : `boolean`
             If True, returns every message. If False, only raises EopError.
         """
-        msg = self.consumer.poll()
+        msg = self.consumer.poll(timeout=1)
 
-        if msg.error():
-            raise EopError(msg)
+        if msg:
+            if msg.error():
+                raise EopError(msg)
+            else:
+                if verbose is True:
+                    if decode is True:
+                        return self.decodeMessage(msg)
+                    else:
+                        ast_msg = literal_eval(str(msg.value(), encoding='utf-8'))
+                        return ast_msg
         else:
-            if verbose is True:
-                if decode is True:
-                    return self.decodeMessage(msg)
-                else:
-                    ast_msg = literal_eval(str(msg.value(), encoding='utf-8'))
-                    return ast_msg
+            try:
+                raise EopError(msg)
+            except AttributeError:
+                pass
         return
 
     def decodeMessage(self, msg):
