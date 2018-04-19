@@ -48,10 +48,19 @@ class AlertConsumer(object):
     """
 
     def __init__(self, topic, schema_files=None, **kwargs):
-        self.consumer = confluent_kafka.Consumer(**kwargs)
-        self.consumer.subscribe([topic])
+        self.topic = topic
+        self.kafka_kwargs = kwargs
         if schema_files is not None:
             self.alert_schema = avroUtils.combineSchemas(schema_files)
+
+    def __enter__(self):
+        self.consumer = confluent_kafka.Consumer(**self.kafka_kwargs)
+        self.consumer.subscribe([self.topic])
+        return self
+
+    def __exit__(self, type, value, traceback):
+        # FIXME should be properly handling exceptions here, but we aren't
+        self.consumer.close()
 
     def poll(self, decode=False, verbose=True):
         """Polls Kafka broker to consume topic.
