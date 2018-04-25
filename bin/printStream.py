@@ -80,7 +80,7 @@ def main():
     args = parser.parse_args()
 
     # Configure consumer connection to Kafka broker
-    conf = {'bootstrap.servers': '128.95.79.19:9092,128.95.79.19:9093,128.95.79.19:9094',
+    conf = {'bootstrap.servers': 'epyc.astro.washington.edu:9092,epyc.astro.washington.edu:9093,epyc.astro.washington.edu:9094',
             'default.topic.config': {'auto.offset.reset': 'smallest'}}
     if args.group:
         conf['group.id'] = args.group
@@ -94,30 +94,29 @@ def main():
                     "../ztf-avro-alert/schema/alert.avsc"]
 
     # Start consumer and print alert stream
-    streamReader = alertConsumer.AlertConsumer(
-                        args.topic, schema_files, **conf)
+    with alertConsumer.AlertConsumer(args.topic, schema_files,
+                                     **conf) as streamReader:
+        while True:
+            try:
+                msg = streamReader.poll(decode=args.avroFlag)
 
-    while True:
-        try:
-            msg = streamReader.poll(decode=args.avroFlag)
+                if msg is None:
+                    continue
+                else:
+                    for record in msg:
+                        # Apply filter to each alert
+                        alert_filter(record, args.stampDir)
 
-            if msg is None:
-                continue
-            else:
-                for record in msg:
-                    # Apply filter to each alert
-                    alert_filter(record, args.stampDir)
-
-        except alertConsumer.EopError as e:
-            # Write when reaching end of partition
-            sys.stderr.write(e.message)
-        except IndexError:
-            sys.stderr.write('%% Data cannot be decoded\n')
-        except UnicodeDecodeError:
-            sys.stderr.write('%% Unexpected data format received\n')
-        except KeyboardInterrupt:
-            sys.stderr.write('%% Aborted by user\n')
-            sys.exit()
+            except alertConsumer.EopError as e:
+                # Write when reaching end of partition
+                sys.stderr.write(e.message)
+            except IndexError:
+                sys.stderr.write('%% Data cannot be decoded\n')
+            except UnicodeDecodeError:
+                sys.stderr.write('%% Unexpected data format received\n')
+            except KeyboardInterrupt:
+                sys.stderr.write('%% Aborted by user\n')
+                sys.exit()
 
 
 if __name__ == "__main__":

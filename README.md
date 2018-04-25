@@ -1,24 +1,14 @@
 alert_stream
 ============
 
-Code to access the ZTF alert stream remotely. 
+Code to access the ZTF alert stream remotely.
 
-Requires Docker and Docker Compose for the usage instructions below.
+Requires Docker for the usage instructions below.
 
 Usage (single host)
 -------------------
 
 Clone repo, cd into directory, and checkout appropriate branch.
-
-**Bring up Kafka broker and Zookeeper**
-
-From the alert_stream directory:
-
-```
-$ docker-compose up -d
-```
-
-This will create a network named `alertstream_default`, or something similar, with the default driver over which the other containers will connect and will start Kafka and Zookeeper.
 
 **Build docker image**
 
@@ -61,16 +51,6 @@ $ docker run -it --rm \
       ztf-listener python bin/printStream.py test-stream --stampDir stamps
 ```
 
-Be careful not to write your output to the main shared data directory.
-
 **Shut down and clean up**
 
-Shutdown Kafka broker system by running the following from the alert_stream directory:
-
-```
-$ docker-compose down
-```
-
 Find your containers with `docker ps` and shut down with `docker kill [id]`.
-Running `docker ps` will list existing running containers and can show you if someone
-is already running alert streams before you try starting your own (which may not work).

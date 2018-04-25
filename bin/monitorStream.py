@@ -25,7 +25,7 @@ def main():
     args = parser.parse_args()
 
     # Configure consumer connection to Kafka broker
-    conf = {'bootstrap.servers': 'epyc.astro.washington.edu:9092',
+    conf = {'bootstrap.servers': 'epyc.astro.washington.edu:9092,epyc.astro.washington.edu:9093,epyc.astro.washington.edu:9094',
             'default.topic.config': {'auto.offset.reset': 'smallest'}}
     if args.group:
         conf['group.id'] = args.group
@@ -33,23 +33,23 @@ def main():
         conf['group.id'] = os.environ['HOSTNAME']
 
     # Start consumer and monitor alert stream
-    streamWatcher = alertConsumer.AlertConsumer(args.topic, **conf)
+    with alertConsumer.AlertConsumer(args.topic, **conf) as streamWatcher:
 
-    while True:
-        try:
-            msg = streamWatcher.poll(decode=False, verbose=False)
+        while True:
+            try:
+                msg = streamWatcher.poll(decode=False, verbose=False)
 
-            if msg is None:
-                continue
-            else:
-                print(msg)
+                if msg is None:
+                    continue
+                else:
+                    print(msg)
 
-        except alertConsumer.EopError as e:
-            # Write when reaching end of partition
-            sys.stderr.write(e.message)
-        except KeyboardInterrupt:
-            sys.stderr.write('%% Aborted by user\n')
-            sys.exit()
+            except alertConsumer.EopError as e:
+                # Write when reaching end of partition
+                sys.stderr.write(e.message)
+            except KeyboardInterrupt:
+                sys.stderr.write('%% Aborted by user\n')
+                sys.exit()
 
 
 if __name__ == "__main__":
