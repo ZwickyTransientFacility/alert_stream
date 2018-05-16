@@ -28,13 +28,13 @@ You must rebuild your image every time you modify any of the code.
 
 **Consume alert stream**
 
-To start a consumer for printing all alerts in the stream "test-stream" to screen:
+To start a consumer for printing all alerts from the host "host-name" in the stream "test-stream" to screen:
 
 ```
 $ docker run -it --rm \
       --network=host \
       --name=$(whoami)_printer \
-      ztf-listener python bin/printStream.py test-stream
+      ztf-listener python bin/printStream.py host-name test-stream
 ```
 
 By default, `printStream.py` will not collect postage stamp cutouts.
@@ -48,7 +48,7 @@ $ docker run -it --rm \
       --network=host \
       --name=$(whoami)_printer \
       -v {local path to write stamps}:/home/alert_stream/stamps:rw \
-      ztf-listener python bin/printStream.py test-stream --stampDir stamps
+      ztf-listener python bin/printStream.py host-name test-stream --stampDir stamps
 ```
 
 **Shut down and clean up**

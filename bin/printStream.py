@@ -59,6 +59,8 @@ def alert_filter(alert, stampdir=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('host', type=str,
+                        help='Hostname or IP of Kafka host to connect to.')
     parser.add_argument('topic', type=str,
                         help='Name of Kafka topic to listen to.')
     parser.add_argument('--group', type=str,
@@ -80,7 +82,7 @@ def main():
     args = parser.parse_args()
 
     # Configure consumer connection to Kafka broker
-    conf = {'bootstrap.servers': 'epyc.astro.washington.edu:9092,epyc.astro.washington.edu:9093,epyc.astro.washington.edu:9094',
+    conf = {'bootstrap.servers': '{}:9092,{}:9093,{}:9094'.format(args.host,args.host,args.host),
             'default.topic.config': {'auto.offset.reset': 'smallest'}}
     if args.group:
         conf['group.id'] = args.group
